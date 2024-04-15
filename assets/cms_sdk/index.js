@@ -10,8 +10,7 @@ export async function cmsUserAuthenticate(mpin) {
         "pin": mpin
     });
     if (response.status === true) {
-        //return true
-        return response
+        return true
     }
     return false;
 }

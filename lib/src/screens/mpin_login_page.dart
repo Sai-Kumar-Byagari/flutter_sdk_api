@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../screens/card_details_page.dart';
 import 'package:flutter_js/flutter_js.dart';
 
 class MPinLoginPage extends StatefulWidget {
@@ -10,6 +9,7 @@ class MPinLoginPage extends StatefulWidget {
   @override
   State<MPinLoginPage> createState() => _MPinLoginPageState();
 }
+
 
 class _MPinLoginPageState extends State<MPinLoginPage> {
   List<int?> pinDigits = List.filled(4,null);
@@ -25,15 +25,46 @@ class _MPinLoginPageState extends State<MPinLoginPage> {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   JavascriptRuntime runtime = getJavascriptRuntime();
-  dynamic path = rootBundle.loadString("assets/cms_sdk_js/index.js");
+  dynamic path = rootBundle.loadString("assets/cms_sdk/index.js");
+
+  // late JavascriptRuntime runtime;
+  // dynamic String jsFileContent;
+
+  // Future<void> loadJsFile() async {
+  //   jsFileContent = await rootBundle.loadString('lib/src/cms_sdk/index.js');
+  //   print(jsFileContent);
+  //   runtime = getJavascriptRuntime();
+  // }
+
+  dynamic subFunction(JavascriptRuntime runtime, pin) async {
+    final jsFile = await path;
+    print(jsFile);
+
+    JsEvalResult jsEvalResult =
+    runtime.evaluate("""${jsFile}cmsUserAuthenticate($pin)""");
+    print(jsEvalResult.stringResult);
+
+    return int.parse(jsEvalResult.stringResult);
+  }
 
   Future<void> _login() async {
     String mpin = pinDigits.join();
 
-    final jsFile = await path;
-    JsEvalResult response = runtime.evaluate("""${jsFile}cmsUserAuthenticate($mpin)""");
+    final result = await subFunction(runtime, mpin);
+    print(result);
 
-    print(response);
+    // if (jsFileContent.isNotEmpty) {
+    //   JsEvalResult response = runtime.evaluate("""
+    //     $jsFileContent
+    //     cmsUserAuthenticate('$mpin');
+    //   """);
+    //   print(response);
+    // }
+
+    // final jsFile = await path;
+    // JsEvalResult response = runtime.evaluate("""${jsFile}cmsUserAuthenticate($mpin)""");
+
+    //print(response);
     // final response = await apiService.verifyMpin(mpin);
     // Map<String, dynamic> data = response.data;
 
@@ -134,6 +165,7 @@ class _MPinLoginPageState extends State<MPinLoginPage> {
   @override
   void initState() {
     super.initState();
+    //loadJsFile();
     pinControllerOne = TextEditingController();
     pinControllerTwo = TextEditingController();
     pinControllerThree = TextEditingController();
